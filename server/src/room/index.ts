@@ -34,7 +34,7 @@ export const roomHandler = (socket: Socket) => {
             console.log(`user left the room`, peerId);
             leaveRoom({roomId, peerId})
         })
-        
+
     };
 
     const leaveRoom = ({roomId, peerId}: IRoomParams) => {
