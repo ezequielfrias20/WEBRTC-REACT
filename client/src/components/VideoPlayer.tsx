@@ -9,9 +9,9 @@ const VideoPlayer = ({ stream }: IParams) => {
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.srcObject = stream;
-  }, [stream])
-  
-  return <video ref={videoRef} autoPlay muted/>;
+  }, [stream]);
+
+  return <video className="w-full h-full object-cover rounded-xl" ref={videoRef} autoPlay muted />;
 };
 
 export default VideoPlayer;

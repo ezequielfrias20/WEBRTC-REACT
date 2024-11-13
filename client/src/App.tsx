@@ -7,7 +7,7 @@ import CreateRoomButton from './components/CreateRoomButton';
 function App() {
   
   return (
-    <div className="App flex justify-center items-center w-screen h-screen">
+    <div className="flex justify-center items-center w-screen h-screen">
       <CreateRoomButton />
     </div>
   );
