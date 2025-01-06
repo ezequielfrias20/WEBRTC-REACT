@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Metrics {
+  id                  String   @id @default(cuid())
+  timestamp           DateTime @default(now())
+  callId              String   
+  jitterVideo         Float    // Variación en el tiempo de llegada de los paquetes
+  packetsLostVideo    Float    // Porcentaje de paquetes perdidos
+  bytesReceivedVideo  Float    // Round-trip time
+  bytesSentVideo      Float    // Tasa de bits (kbps)
+  roundTripTimeVideo  Float   // Nivel de audio, opcional
+  jitterAudio         Float    // Variación en el tiempo de llegada de los paquetes
+  packetsLostAudio    Float    // Porcentaje de paquetes perdidos
+  bytesReceivedAudio  Float    // Round-trip time
+  bytesSentAudio      Float    // Tasa de bits (kbps)
+  roundTripTimeAudio  Float   // Nivel de audio, opcional
+  networkType         String?
+}

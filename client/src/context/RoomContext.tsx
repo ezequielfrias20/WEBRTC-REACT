@@ -1,11 +1,11 @@
 import Peer from "peerjs";
-import { createContext, useEffect, useReducer, useState } from "react";
+import { createContext, useEffect, useMemo, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import socketIOClient from "socket.io-client";
 import { v4 as uuidV4 } from "uuid";
 import { peersReducer } from "./PeerReducer";
 import { addPeerAction, removePeerAction } from "./PeerActions";
-import { collectQoSStats } from "../utils/collectQoS";
+import { collectQoSStats, metrics } from "../utils/collectQoS";
 
 const WS = "http://localhost:8080";
 
@@ -20,6 +20,7 @@ export const RoomProvider = ({ children }: any) => {
   const [peers, dispatch] = useReducer(peersReducer, {});
   const [screenSharingId, setScreenSharingId] = useState("");
   const [dataQoS, setDataQoS] = useState<any[]>([]);
+  const [isCollectingData, setIsCollectingData] = useState(false);
 
   const enterRoom = ({ roomId }: any) => {
     navigate(`/room/${roomId}`);
@@ -101,8 +102,6 @@ export const RoomProvider = ({ children }: any) => {
   //   }, 5 * 60 * 1000);
   // }
 
-  console.log("Data completa: ", JSON.stringify(dataQoS));
-
   // console.log(dataQoS);
   useEffect(() => {
     const meId = uuidV4();
@@ -136,13 +135,20 @@ export const RoomProvider = ({ children }: any) => {
     if (!me) return;
     if (!stream) return;
 
-    ws.on("user-joined", ({ peerId }) => {
+    ws.on("user-joined", ({ peerId, roomId }) => {
       console.log("[user-joined]: ", { peerId });
+      let newMetrics = false;
       const call = me.call(peerId, stream);
       call.on("stream", (peerStream) => {
         dispatch(addPeerAction(peerId, peerStream));
         // Llamar a la función para recolectar estadísticas de QoS
-        collectQoSStats(call.peerConnection, setDataQoS);
+        if (isCollectingData || newMetrics) return;
+        setIsCollectingData(true);
+        newMetrics = true;
+        metrics(call.peerConnection, () => {
+          setIsCollectingData(false);
+          newMetrics = false;
+        }, roomId);
       });
     });
 
@@ -151,7 +157,7 @@ export const RoomProvider = ({ children }: any) => {
       console.log("[call]: ", call);
       call.on("stream", (peerStream: MediaStream) => {
         dispatch(addPeerAction(call.peer, peerStream));
-        collectQoSStats(call.peerConnection, setDataQoS);
+        // metrics(call.peerConnection, setDataQoS);
       });
     });
 
@@ -160,8 +166,15 @@ export const RoomProvider = ({ children }: any) => {
     };
   }, [ws, me, stream]);
 
+  const values = useMemo(
+    () => ({ ws, me, stream, peers, shareScreen, isCollectingData }),
+    [ws, me, stream, peers, shareScreen, isCollectingData]
+  );
+
   return (
-    <RoomContext.Provider value={{ ws, me, stream, peers, shareScreen }}>
+    <RoomContext.Provider
+      value={values}
+    >
       {children}
     </RoomContext.Provider>
   );

@@ -19,7 +19,7 @@ export const roomHandler = (socket: Socket) => {
     };
     const joinroom = ({ roomId, peerId }: IRoomParams) => {
         if (rooms[roomId]) {
-            console.log('user joined the room: ', roomId);
+            console.log('user joined the room: ', roomId, peerId);
             if (!(rooms[roomId].includes(peerId))) {
                 rooms[roomId].push(peerId)
             }
@@ -28,6 +28,8 @@ export const roomHandler = (socket: Socket) => {
                 roomId,
                 participants: rooms[roomId]
             })
+
+            socket.to(roomId).emit("user-joined", { peerId, roomId });
         }
 
         socket.on('disconnect', () => {
@@ -38,8 +40,13 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const leaveRoom = ({roomId, peerId}: IRoomParams) => {
-        rooms[roomId] = rooms[roomId].filter(id => id !== peerId);
-        socket.to(roomId).emit('user-disconnected', peerId)
+        if (rooms[roomId]) {
+            rooms[roomId] = rooms[roomId].filter(id => id !== peerId);
+            socket.to(roomId).emit('user-disconnected', peerId)
+        } else (
+            console.log('[room no existe]', roomId)
+        )
+
     }
     socket.on("create-room", createroom);
     socket.on("join-room", joinroom);
