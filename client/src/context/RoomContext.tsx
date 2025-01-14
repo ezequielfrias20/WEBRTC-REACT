@@ -107,6 +107,12 @@ export const RoomProvider = ({ children }: any) => {
     const meId = uuidV4();
     // Id que Peer le asigna a cada usuario
     const peer = new Peer(meId);
+    // const peer = new Peer(meId, {
+    //   host: 'localhost',
+    //   port: 8080,
+    //   path: '/peerjs',
+    // });
+    console.log(peer)
     setMe(peer);
     try {
       // Funcion para acceder a la camara y microfono
@@ -173,7 +179,7 @@ export const RoomProvider = ({ children }: any) => {
 
   return (
     <RoomContext.Provider
-      value={values}
+      value={{ ws, me, stream, peers, shareScreen, isCollectingData }}
     >
       {children}
     </RoomContext.Provider>

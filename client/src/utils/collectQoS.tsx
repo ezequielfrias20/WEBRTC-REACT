@@ -183,7 +183,18 @@ export async function metrics(
     peerConnection
       .getStats(null)
       .then((stats) => {
-        let currentReport = {};
+        let currentReport = {
+          jitterVideo: 0,
+          packetsLostVideo: 0,
+          bytesReceivedVideo: 0,
+          bytesSentVideo: 0,
+          roundTripTimeVideo: 0,
+          jitterAudio: 0,
+          packetsLostAudio: 0,
+          bytesReceivedAudio: 0,
+          bytesSentAudio: 0,
+          roundTripTimeAudio: 0
+        };
         stats.forEach((report: any) => {
           if (report.kind === "video") {
             if (report.type === "inbound-rtp") {
