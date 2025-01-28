@@ -4,6 +4,7 @@ import {Server} from 'socket.io';
 import cors from 'cors';
 import { roomHandler } from './room';
 import Routes from "./routes"
+import { ExpressPeerServer } from 'peer';
 
 
 const port = 8080;
@@ -30,6 +31,14 @@ io.on("connection", (socket) => {
         console.log('user is disconnected')
     })
 })
+
+// Configuración del servidor PeerJS
+const peerServer = ExpressPeerServer(server, {
+    path: '/myapp',
+  });
+
+// servidor PeerJS
+app.use('/peerjs', peerServer);
 
 server.listen(port, () => {
     console.log(`Listening to the server on ${port}`)

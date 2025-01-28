@@ -13,15 +13,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+// model User {
+//   id        Int       @id @default(autoincrement())
+//   name      String
+//   email     String    @unique
+//   password  String
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   callsHost CallRoom[] @relation("Host")
+//   participants Participante[]
+// }
+
+model Room {
+  id        String       @id @default(uuid())
+  // hostId    Int
+  // host      User      @relation("Host", fields: [hostId], references: [id])
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  endedAt   DateTime?
+  participants Participant[]
+  metrics     Metrics[]
+}
+
+model Participant {
+  id          Int       @id @default(autoincrement())
+  // userId      Int
+  // user        User   @relation(fields: [userId], references: [id])
+  peerId      String
+  roomId      String
+  callRoom    Room  @relation(fields: [roomId], references: [id])
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+}
 model Metrics {
   id                  String   @id @default(cuid())
   timestamp           DateTime @default(now())
-  callId              String   
+  roomId              String
+  callRoom            Room     @relation(fields: [roomId], references: [id]) // Relación con CallRoom 
   jitterVideo         Float    // Variación en el tiempo de llegada de los paquetes
   packetsLostVideo    Float    // Porcentaje de paquetes perdidos
   bytesReceivedVideo  Float    // Round-trip time
   bytesSentVideo      Float    // Tasa de bits (kbps)
-  roundTripTimeVideo  Float   // Nivel de audio, opcional
+  roundTripTimeVideo  Float    // Nivel de audio, opcional
   jitterAudio         Float    // Variación en el tiempo de llegada de los paquetes
   packetsLostAudio    Float    // Porcentaje de paquetes perdidos
   bytesReceivedAudio  Float    // Round-trip time

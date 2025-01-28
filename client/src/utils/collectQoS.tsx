@@ -244,7 +244,7 @@ export async function metrics(
         console.log("[METRICAS A ENVIAR]: ", currentReport);
         if ('connection' in navigator) {
           const connection = navigator.connection as NetworkInformation;
-          createMetrics({ ...currentReport, networkType: connection?.effectiveType ?? "N/A", callId: roomId });
+          createMetrics({ ...currentReport, networkType: connection?.effectiveType ?? "N/A", roomId });
         } else {
           console.log('La Network Information API no es compatible con este navegador.');
         }
@@ -261,5 +261,5 @@ export async function metrics(
       "==== Recolección de estadísticas completada después de 5 minutos. ===="
     );
     handleClose();
-  }, 10 * 1000);
+  }, 5 * 60 * 1000);
 }

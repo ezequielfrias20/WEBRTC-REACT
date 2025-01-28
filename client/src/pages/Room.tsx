@@ -38,7 +38,7 @@ const Room = () => {
     if (totalStreams <= 9) return "grid-cols-3 grid-rows-3 rounded-lg";
     return "grid-cols-4 grid-rows-3";
   };
-
+  // ssssss
   const handleCollectData = () => {
     if (isEmpty(Object.keys(peers))) return;
     setIsCollectedData(true);

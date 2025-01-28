@@ -106,7 +106,18 @@ export const RoomProvider = ({ children }: any) => {
   useEffect(() => {
     const meId = uuidV4();
     // Id que Peer le asigna a cada usuario
-    const peer = new Peer(meId);
+    const peer = new Peer(meId, {
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { 
+            urls: "turn:your-turn-server.com",
+            username: "user",
+            credential: "password"
+          },
+        ],
+      },
+    });
     // const peer = new Peer(meId, {
     //   host: 'localhost',
     //   port: 8080,
@@ -128,6 +139,10 @@ export const RoomProvider = ({ children }: any) => {
     ws.on("get-users", getUsers);
     ws.on("user-disconnected", removePeer);
 
+    peer.on("error", (err) => {
+      console.error("PeerJS error:", err);
+    });
+
     return () => {
       ws.off("room-created");
       ws.off("get-users");
@@ -145,6 +160,9 @@ export const RoomProvider = ({ children }: any) => {
       console.log("[user-joined]: ", { peerId });
       let newMetrics = false;
       const call = me.call(peerId, stream);
+      console.log("[call]: ", call);
+      console.log("[peerId]: ", peerId);
+      console.log("[stream]: ", stream);
       call.on("stream", (peerStream) => {
         dispatch(addPeerAction(peerId, peerStream));
         // Llamar a la función para recolectar estadísticas de QoS
