@@ -18,6 +18,8 @@ const Room = () => {
 
   const [totalPeers, setTotalPeers] = useState<any[]>([]);
 
+  //nuevo nuevo nuevowwww
+
   useEffect(() => {
     if (me) ws.emit("join-room", { roomId: id, peerId: me._id });
   }, [id, ws, me]);

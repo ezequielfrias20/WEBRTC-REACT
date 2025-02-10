@@ -63,3 +63,37 @@ model Metrics {
   roundTripTimeAudio  Float   // Nivel de audio, opcional
   networkType         String?
 }
+
+// model QoSMetrics {
+//   id        Int      @id @default(autoincrement())
+//   timestamp DateTime
+//   roomId              String
+//   callRoom            Room     @relation(fields: [roomId], references: [id]) // Relación con CallRoom 
+//   rtt       Float?
+//   outgoingBitrate Float?
+//   incomingBitrate Float?
+//   retransmissionRate Float?
+//   packetsLost Int?
+//   transportType String?
+//   localCandidateType String?
+//   remoteCandidateType String?
+//   videoSentBitrate Float?
+//   videoSentFrameRate Float?
+//   videoSentResolution String?
+//   videoSentPacketsLost Int?
+//   videoSentFramesEncoded Int?
+//   videoSentRetransmittedPackets Int?
+//   videoSentCodec String?
+//   videoReceivedBitrate Float?
+//   videoReceivedFrameRate Float?
+//   videoReceivedResolution String?
+//   videoReceivedJitter Float?
+//   videoReceivedPacketsLost Int?
+//   audioSentBitrate Float?
+//   audioSentPacketsLost Int?
+//   audioSentCodec String?
+//   audioSentRetransmittedPackets Int?
+//   audioReceivedBitrate Float?
+//   audioReceivedJitter Float?
+//   audioReceivedPacketsLost Int?
+// }

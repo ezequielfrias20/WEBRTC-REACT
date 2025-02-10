@@ -5,7 +5,7 @@ import socketIOClient from "socket.io-client";
 import { v4 as uuidV4 } from "uuid";
 import { peersReducer } from "./PeerReducer";
 import { addPeerAction, removePeerAction } from "./PeerActions";
-import { collectQoSStats, metrics } from "../utils/collectQoS";
+import { collectQoSStats, getQoSStats, metrics } from "../utils/collectQoS";
 
 const WS = "http://localhost:8080";
 
@@ -123,7 +123,6 @@ export const RoomProvider = ({ children }: any) => {
     //   port: 8080,
     //   path: '/peerjs',
     // });
-    console.log(peer)
     setMe(peer);
     try {
       // Funcion para acceder a la camara y microfono
@@ -160,9 +159,6 @@ export const RoomProvider = ({ children }: any) => {
       console.log("[user-joined]: ", { peerId });
       let newMetrics = false;
       const call = me.call(peerId, stream);
-      console.log("[call]: ", call);
-      console.log("[peerId]: ", peerId);
-      console.log("[stream]: ", stream);
       call.on("stream", (peerStream) => {
         dispatch(addPeerAction(peerId, peerStream));
         // Llamar a la función para recolectar estadísticas de QoS
@@ -173,6 +169,7 @@ export const RoomProvider = ({ children }: any) => {
           setIsCollectingData(false);
           newMetrics = false;
         }, roomId);
+        // getQoSStats(call.peerConnection);
       });
     });
 
