@@ -1,11 +1,12 @@
 import Peer from "peerjs";
-import { createContext, useEffect, useMemo, useReducer, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import socketIOClient from "socket.io-client";
 import { v4 as uuidV4 } from "uuid";
 import { peersReducer } from "./PeerReducer";
 import { addPeerAction, removePeerAction } from "./PeerActions";
-import { collectQoSStats, getQoSStats, metrics } from "../utils/collectQoS";
+import { getQoSStats, metrics } from "../utils/collectQoS";
+import toast from "react-hot-toast";
 
 const WS = "http://localhost:8080";
 
@@ -19,8 +20,9 @@ export const RoomProvider = ({ children }: any) => {
   const [stream, setStream] = useState<MediaStream>();
   const [peers, dispatch] = useReducer(peersReducer, {});
   const [screenSharingId, setScreenSharingId] = useState("");
-  const [dataQoS, setDataQoS] = useState<any[]>([]);
   const [isCollectingData, setIsCollectingData] = useState(false);
+  const [cameraOn, setCameraOn] = useState(true);
+  const [micOn, setMicOn] = useState(true);
 
   const enterRoom = ({ roomId }: any) => {
     navigate(`/room/${roomId}`);
@@ -31,6 +33,20 @@ export const RoomProvider = ({ children }: any) => {
   };
   const removePeer = (peerId: string) => {
     dispatch(removePeerAction(peerId));
+  };
+
+  const toggleCamera = () => {
+    if (stream) {
+      stream.getVideoTracks().forEach(track => (track.enabled = !track.enabled));
+      setCameraOn(!cameraOn);
+    }
+  };
+
+  const toggleMic = () => {
+    if (stream) {
+      stream.getAudioTracks().forEach(track => (track.enabled = !track.enabled));
+      setMicOn(!micOn);
+    }
   };
   const switchScreen = (stream: MediaStream) => {
     setStream(stream);
@@ -106,23 +122,7 @@ export const RoomProvider = ({ children }: any) => {
   useEffect(() => {
     const meId = uuidV4();
     // Id que Peer le asigna a cada usuario
-    const peer = new Peer(meId, {
-      config: {
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { 
-            urls: "turn:your-turn-server.com",
-            username: "user",
-            credential: "password"
-          },
-        ],
-      },
-    });
-    // const peer = new Peer(meId, {
-    //   host: 'localhost',
-    //   port: 8080,
-    //   path: '/peerjs',
-    // });
+    var peer = new Peer(meId);
     setMe(peer);
     try {
       // Funcion para acceder a la camara y microfono
@@ -143,6 +143,7 @@ export const RoomProvider = ({ children }: any) => {
     });
 
     return () => {
+      stream?.getTracks().forEach(track => track.stop());
       ws.off("room-created");
       ws.off("get-users");
       ws.off("user-disconnected");
@@ -158,25 +159,34 @@ export const RoomProvider = ({ children }: any) => {
     ws.on("user-joined", ({ peerId, roomId }) => {
       console.log("[user-joined]: ", { peerId });
       let newMetrics = false;
-      const call = me.call(peerId, stream);
-      call.on("stream", (peerStream) => {
-        dispatch(addPeerAction(peerId, peerStream));
-        // Llamar a la función para recolectar estadísticas de QoS
-        if (isCollectingData || newMetrics) return;
-        setIsCollectingData(true);
-        newMetrics = true;
-        metrics(call.peerConnection, () => {
-          setIsCollectingData(false);
-          newMetrics = false;
-        }, roomId);
-        // getQoSStats(call.peerConnection);
-      });
+      setTimeout(() => {
+        console.log("Stream: ", stream);
+        const call = me.call(peerId, stream);
+        console.log("Llamando...");
+        call.on("stream", (peerStream) => {
+          console.log("Recibiendo Video del anfitrion...");
+          dispatch(addPeerAction(peerId, peerStream));
+          // Llamar a la función para recolectar estadísticas de QoS
+          if (isCollectingData || newMetrics) return;
+          setIsCollectingData(true);
+          newMetrics = true;
+          toast.success("Recolectando datos!")
+          metrics(call.peerConnection, () => {
+            setIsCollectingData(false);
+            newMetrics = false;
+          }, roomId);
+          // getQoSStats(call.peerConnection);
+        });
+      }, 2000)
+      
     });
 
     me.on("call", (call) => {
-      call.answer(stream);
+      console.log("Recibiendo llamada...");
+      call.answer(stream);  
       console.log("[call]: ", call);
       call.on("stream", (peerStream: MediaStream) => {
+        console.log("Recibiendo Video del anfitrion...");
         dispatch(addPeerAction(call.peer, peerStream));
         // metrics(call.peerConnection, setDataQoS);
       });
@@ -188,15 +198,20 @@ export const RoomProvider = ({ children }: any) => {
   }, [ws, me, stream]);
 
   const values = useMemo(
-    () => ({ ws, me, stream, peers, shareScreen, isCollectingData }),
-    [ws, me, stream, peers, shareScreen, isCollectingData]
+    () => ({ ws, me, stream, peers, shareScreen, isCollectingData, toggleCamera, toggleMic, cameraOn, micOn }),
+    [ws, me, stream, peers, shareScreen, isCollectingData, toggleCamera, toggleMic, cameraOn, micOn]
   );
 
   return (
     <RoomContext.Provider
-      value={{ ws, me, stream, peers, shareScreen, isCollectingData }}
+      value={{ ws, me, stream, peers, shareScreen, isCollectingData, toggleCamera, toggleMic, cameraOn, micOn }}
     >
       {children}
     </RoomContext.Provider>
   );
+};
+
+
+export const useRoom = () => {
+  return useContext(RoomContext);
 };

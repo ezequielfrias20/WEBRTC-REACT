@@ -196,6 +196,7 @@ export async function metrics(
           bytesSentAudio: 0,
           roundTripTimeAudio: 0,
         };
+        const datos = [] as any;
         stats.forEach((report: any) => {
           if (report.kind === "video") {
             if (report.type === "inbound-rtp") {
@@ -220,31 +221,33 @@ export async function metrics(
             }
           }
           if (report.kind === "audio") {
+            datos.push(report);
             if (report.type === "inbound-rtp") {
               currentReport = {
                 ...currentReport,
-                jitterAudio: report?.jitter ?? 0,
+                // jitterAudio: report?.jitter ?? 0,
                 packetsLostAudio: report?.packetsLost ?? 0,
                 bytesReceivedAudio: report?.bytesReceived ?? 0,
               };
-              if (report.type === "outbound-rtp") {
-                currentReport = {
-                  ...currentReport,
-                  bytesSentAudio: report?.bytesSent ?? 0,
-                };
-              }
-              if (report.type === "remote-inbound-rtp") {
-                currentReport = {
-                  ...currentReport,
-                  roundTripTimeAudio: report?.roundTripTime ?? 0,
-                };
-              }
+            }
+            if (report.type === "outbound-rtp") {
+              currentReport = {
+                ...currentReport,
+                bytesSentAudio: report?.bytesSent ?? 0,
+              };
+            }
+            if (report.type === "remote-inbound-rtp") {
+              currentReport = {
+                ...currentReport,
+                roundTripTimeAudio: report?.roundTripTime ?? 0,
+                jitterAudio: report?.jitter ?? 0,
+              };
             }
           }
         });
-        console.log("[METRICAS A ENVIAR]: ", currentReport);
         if ("connection" in navigator) {
           const connection = navigator.connection as NetworkInformation;
+          console.log("[DATOS]: ", datos);
           createMetrics({
             ...currentReport,
             networkType: connection?.effectiveType ?? "N/A",
@@ -259,7 +262,7 @@ export async function metrics(
       .catch((err) => console.error("Error getting stats:", err));
     // });
   };
-  setInterval(collectMetrics, 1000); // Recolecta estadísticas cada 5 segundos
+  setInterval(collectMetrics, 5000); // Recolecta estadísticas cada 5 segundos
 
   // setTimeout(() => {
   //   clearInterval(intervalId); // Detiene el intervalo al alcanzar los 5 minutos

@@ -1,20 +1,27 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { RoomContext } from "../context/RoomContext";
+import { useRoom } from "../context/RoomContext";
 import VideoPlayer from "../components/VideoPlayer";
 import { PeerState } from "../context/PeerReducer";
-import ShareScreenButton from "../components/ShareScreenButton";
-import CustomButtomRoom from "../components/buttons/CustomButtomRoom";
-import { MdAssignmentReturned, MdOutlineFeed } from "react-icons/md";
-import { collectQoSStats } from "../utils/collectQoS";
-import { isEmpty } from "lodash";
-import CsvDownloadButton from "react-json-to-csv";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
+import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
+import MicOffOutlinedIcon from "@mui/icons-material/MicOffOutlined";
 
 const Room = () => {
   const { id } = useParams();
-  const { ws, me, stream, peers, shareScreen, isCollectingData } = useContext(RoomContext);
-  const [isCollectedData, setIsCollectedData] = useState(false);
-  const [mockData, setMockData] = useState<null | any[]>(null);
+  const {
+    ws,
+    me,
+    stream,
+    peers,
+    shareScreen,
+    isCollectingData,
+    toggleCamera,
+    toggleMic,
+    cameraOn,
+    micOn,
+  } = useRoom();
 
   const [totalPeers, setTotalPeers] = useState<any[]>([]);
 
@@ -40,23 +47,18 @@ const Room = () => {
     if (totalStreams <= 9) return "grid-cols-3 grid-rows-3 rounded-lg";
     return "grid-cols-4 grid-rows-3";
   };
-  // ssssss
-  const handleCollectData = () => {
-    if (isEmpty(Object.keys(peers))) return;
-    setIsCollectedData(true);
-    // collectQoSStats(me.call(peers, stream)?.peerConnection, setMockData)
-  };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-300">
-      {isCollectingData && (
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
+      {/* {isCollectingData && (
         <div className="w-full h-20 bg-rose-400 flex items-center justify-center gap-4 text-lg font-semibold text-white font-sans">
           <MdOutlineFeed size={40} />
           Recopilando Datos de Red
         </div>
-      )}
+      )} */}
       <div
-        className={`grid ${getGridClasses()} gap-1 flex-grow overflow-hidden p-6`}
+        // className={`grid ${getGridClasses()} gap-1 flex-grow overflow-hidden p-6`}
+        className= "flex justify-center items-center gap-10 w-full h-full flex-row flex-grow flex-wrap"
       >
         <VideoPlayer stream={stream} />
         {totalPeers.map((peer) => (
@@ -64,16 +66,18 @@ const Room = () => {
         ))}
       </div>
       <div className="flex justify-center w-full flex-row gap-4 pb-6">
-        <ShareScreenButton onClick={shareScreen} />
-        <CustomButtomRoom
-          onClick={handleCollectData}
-          icon={<MdAssignmentReturned />}
-          info="Recolectar data"
-        />
-        <CsvDownloadButton
-          data={mockData as object | object[]}
-          className="bg-rose-400 p-4 rounded-lg text-xl hover:bg-rose-600 text-white"
-        />
+        <button
+          onClick={toggleCamera}
+          className="p-2 bg-gray-800 text-white rounded-full hover:bg-gray-600 transition"
+        >
+          {!cameraOn ? <VideocamOffOutlinedIcon /> : <VideocamOutlinedIcon />}
+        </button>
+        <button
+          onClick={toggleMic}
+          className="p-2 bg-gray-800 text-white rounded-full hover:bg-gray-600 transition"
+        >
+          {!micOn ? <MicOffOutlinedIcon /> : <MicNoneOutlinedIcon />}
+        </button>
       </div>
     </div>
   );

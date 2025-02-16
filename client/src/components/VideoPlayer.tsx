@@ -11,7 +11,7 @@ const VideoPlayer = ({ stream }: IParams) => {
     if (videoRef.current) videoRef.current.srcObject = stream;
   }, [stream]);
 
-  return <video className="w-full h-full object-cover rounded-lg" ref={videoRef} autoPlay muted />;
+  return <video className="w-100 h-1000 object-contain rounded-lg" ref={videoRef} autoPlay />;
 };
 
 export default VideoPlayer;
