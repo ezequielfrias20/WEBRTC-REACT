@@ -248,11 +248,11 @@ export async function metrics(
         if ("connection" in navigator) {
           const connection = navigator.connection as NetworkInformation;
           console.log("[DATOS]: ", datos);
-          createMetrics({
-            ...currentReport,
-            networkType: connection?.effectiveType ?? "N/A",
-            roomId,
-          });
+          // createMetrics({
+          //   ...currentReport,
+          //   networkType: connection?.effectiveType ?? "N/A",
+          //   roomId,
+          // });
         } else {
           console.log(
             "La Network Information API no es compatible con este navegador."

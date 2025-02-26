@@ -2,13 +2,13 @@ import React, { useRef, useEffect, useState } from "react";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
 import { useRoom } from "../../context/RoomContext";
-import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
-import MicOffOutlinedIcon from '@mui/icons-material/MicOffOutlined';
+import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
+import MicOffOutlinedIcon from "@mui/icons-material/MicOffOutlined";
 
 const FloatingVideoCallCard = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { cameraOn, micOn, stream, toggleCamera, toggleMic, ws } = useRoom();
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
 
   const createRoom = () => {
     ws.emit("create-room", {
@@ -47,7 +47,7 @@ const FloatingVideoCallCard = () => {
               onClick={toggleMic}
               className="p-2 bg-gray-800 text-white rounded-full hover:bg-gray-600 transition"
             >
-              {!micOn ? <MicOffOutlinedIcon/> : <MicNoneOutlinedIcon />}
+              {!micOn ? <MicOffOutlinedIcon /> : <MicNoneOutlinedIcon />}
             </button>
           </div>
         </div>
@@ -63,7 +63,10 @@ const FloatingVideoCallCard = () => {
             className="p-2 border rounded-lg w-full mb-4"
             onChange={(e) => setName(e.target.value)}
           />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition w-full" onClick={createRoom}>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition w-full"
+            onClick={createRoom}
+          >
             Unirse
           </button>
         </div>
